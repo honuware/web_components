@@ -1,0 +1,37 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@honuware/ui": ["projects/honuware-ui/src/public-api.ts"],
+      "@honuware/ui/foundation": ["projects/honuware-ui/foundation/src/public-api.ts"],
+      "@honuware/ui/access": ["projects/honuware-ui/access/src/public-api.ts"],
+      "@honuware/ui/controls": ["projects/honuware-ui/controls/src/public-api.ts"],
+      "@honuware/ui/photos": ["projects/honuware-ui/photos/src/public-api.ts"],
+      "@honuware/ui/auth": ["projects/honuware-ui/auth/src/public-api.ts"],
+      "@honuware/ui/crud": ["projects/honuware-ui/crud/src/public-api.ts"],
+      "@honuware/ui/square": ["projects/honuware-ui/square/src/public-api.ts"],
+      "@honuware/ui/testing": ["projects/honuware-ui/testing/src/public-api.ts"]
+    }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  },
+  "files": []
+}

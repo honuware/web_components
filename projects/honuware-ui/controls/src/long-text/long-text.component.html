@@ -1,0 +1,36 @@
+@if (isLoading) {
+<div id="loading">
+  Loading...
+</div>
+}
+
+@if (!isLoading) {
+<div class="form-fields">
+  <mat-form-field>
+    <mat-label>{{ displayLabel }}</mat-label>
+    <textarea matInput
+              [id]="dataInfo?.column_name ?? ''"
+              [formControl]="textInput"
+              [placeholder]="dataInfo?.place_holder ?? ''"
+              [rows]="dataInfo?.rows || 3"></textarea>
+
+    @if (dataInfo?.hint) {
+    <mat-hint>{{ dataInfo?.hint }}</mat-hint>
+    }
+
+  </mat-form-field>
+
+  @if (textInput.touched && textInput.hasError('required')) {
+  <mat-error>This field is required.</mat-error>
+  }
+
+  @if (textInput.touched && textInput.hasError('maxlength')) {
+  <mat-error>Max {{ dataInfo?.max_length }} characters allowed.</mat-error>
+  }
+
+  @if (textInput.touched && textInput.hasError('pattern')) {
+  <mat-error class="error">Invalid format.</mat-error>
+  }
+
+</div>
+ }

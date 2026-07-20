@@ -1,0 +1,72 @@
+@if (isLoading)
+{
+<div>Loading...</div>
+}
+
+@if (!isLoading)
+{
+  @switch (activeComponent)
+  {
+    @case ('text')
+    {
+<hw-simple-text [dataInfo]="dataInfo"
+                 [value]="value"
+                 [readOnly]="readOnly"
+                 (valueChanged)="onValueChanged($event)">
+</hw-simple-text>
+    }
+
+    @case ('long-text')
+    {
+<hw-long-text [dataInfo]="dataInfo"
+               [value]="value"
+               [readOnly]="readOnly"
+               (valueChanged)="onValueChanged($event)">
+</hw-long-text>
+    }
+
+    @case ('enum')
+    {
+<hw-simple-enum [dataInfo]="dataInfo"
+                 [value]="value"
+                 [readOnly]="readOnly"
+                 (enumValueChange)="onValueChanged($event)">
+</hw-simple-enum>
+    }
+
+    @case ('bool')
+    {
+<hw-simple-bool [dataInfo]="dataInfo"
+                 [value]="value"
+                 [readOnly]="readOnly"
+                 (checkboxValueChange)="onValueChanged($event)">
+</hw-simple-bool>
+    }
+
+    @case ('date')
+    {
+<hw-simple-date [dataInfo]="dataInfo"
+                 [value]="value"
+                 [readOnly]="readOnly"
+                 (valueChange)="onValueChanged($event)">
+</hw-simple-date>
+    }
+
+    @case ('fk')
+    {
+<hw-fk-picker [dataInfo]="dataInfo"
+               [value]="value"
+               [readOnly]="readOnly"
+               [foreignKeyInfo]="foreignKeyInfo"
+               (valueChanged)="onValueChanged($event)">
+</hw-fk-picker>
+    }
+
+    @default
+    {
+<div>
+  Unsupported component type.
+</div>
+    }
+  }
+}

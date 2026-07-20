@@ -1,0 +1,30 @@
+@if (isLoading) {
+<div class="loading">Loading...</div>
+}
+
+@if (!isLoading) {
+<div class="form-fields">
+  @if (readOnly) {
+    <mat-form-field>
+      <mat-label>{{ displayLabel }}</mat-label>
+      <input matInput [value]="resolvedDisplayText" disabled>
+    </mat-form-field>
+  } @else {
+    <mat-form-field>
+      <mat-label>{{ displayLabel }}</mat-label>
+      <input matInput
+             [formControl]="searchControl"
+             [matAutocomplete]="auto"
+             [placeholder]="dataInfo?.place_holder ?? ''">
+      <mat-autocomplete #auto="matAutocomplete"
+                        panelWidth="auto"
+                        [displayWith]="displayFn"
+                        (optionSelected)="onOptionSelected($event)">
+        @for (option of filteredOptions; track option.value) {
+          <mat-option [value]="option">{{ option.display }}</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+  }
+</div>
+}

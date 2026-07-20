@@ -1,0 +1,31 @@
+@if (loading) {
+  <div class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading...</p>
+  </div>
+}
+@if (!loading && error) {
+  <div class="error-container">
+    <mat-icon>error</mat-icon>
+    <p>{{ error }}</p>
+  </div>
+}
+@if (!loading && !error) {
+  <div class="edit-page-container">
+    <a [routerLink]="adminHome" class="din text-sm text-blue-600 hover:underline mb-4 inline-block">&larr; Back to admin portal</a>
+    <h1 class="din-condensed-bold text-2xl mb-6">Edit {{ tableFriendlyName }}</h1>
+    <mat-card class="edit-card">
+      <mat-card-content>
+        <hw-composite-row-control
+          [tableName]="tableName"
+          [columnNames]="columnNames"
+          [primaryKeyName]="primaryKeyName"
+          [primaryKeyValue]="primaryKeyValue"
+          [isCreateMode]="false"
+          [returnUrl]="returnUrl"
+          [bindingStack]="bindingStack">
+        </hw-composite-row-control>
+      </mat-card-content>
+    </mat-card>
+  </div>
+}

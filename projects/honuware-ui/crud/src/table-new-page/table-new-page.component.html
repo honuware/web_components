@@ -1,0 +1,20 @@
+@if (loading) {
+  <div class="loading">Loading...</div>
+}
+@if (!loading && error) {
+  <div class="error">{{ error }}</div>
+}
+@if (!loading && !error) {
+  <div class="new-page-container">
+    <a [routerLink]="adminHome" class="din text-sm text-blue-600 hover:underline mb-4 inline-block">&larr; Back to admin portal</a>
+    <h1 class="din-condensed-bold text-2xl mb-6">New {{ tableFriendlyName }}</h1>
+    <hw-composite-row-control
+      [tableName]="tableName"
+      [columnNames]="columnNames"
+      [isCreateMode]="true"
+      [returnUrl]="returnUrl"
+      [bindingStack]="bindingStack"
+      [formAssist]="formAssist">
+    </hw-composite-row-control>
+  </div>
+}

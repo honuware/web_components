@@ -1,0 +1,12 @@
+.form-fields {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.mat-form-field .mat-error {
+  white-space: normal; /* Allow text to wrap */
+  line-height: 1.5; /* Adjust line height for better readability */
+  max-height: none; /* Remove any height restrictions */
+  padding: 0; /* Adjust padding if necessary */
+}

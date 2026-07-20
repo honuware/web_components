@@ -1,0 +1,98 @@
+.photo-upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  max-width: 350px;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.photo-display {
+  .current-photo {
+    max-width: 300px;
+    max-height: 300px;
+    border-radius: 4px;
+    object-fit: contain;
+  }
+}
+
+.photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  height: 150px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  color: #9e9e9e;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+
+  span {
+    margin-top: 8px;
+    font-size: 14px;
+  }
+}
+
+.upload-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  color: #666;
+  font-size: 14px;
+  cursor: default;
+
+  &:hover {
+    border-color: #3f51b5;
+  }
+
+  mat-icon {
+    color: #3f51b5;
+  }
+}
+
+.file-input-label {
+  span {
+    color: #3f51b5;
+    cursor: pointer;
+    text-decoration: underline;
+
+    &:hover {
+      color: #303f9f;
+    }
+  }
+}
+
+.delete-button {
+  font-size: 13px;
+}
+
+.uploading-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  color: #666;
+  font-size: 14px;
+}
+
+.error-message {
+  color: #f44336;
+  font-size: 13px;
+}

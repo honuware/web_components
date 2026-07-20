@@ -1,0 +1,159 @@
+<div class="table-view-container">
+  <!-- Back to Parent button -->
+  @if (hasParent) {
+    <button mat-stroked-button class="parent-button" (click)="onNavigateToParent()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to {{ parentFriendlyName }}
+    </button>
+  }
+
+  <!-- Header with New Item button -->
+  <div class="table-header">
+    <h2>{{ tableSchema?.table_friendly_name || tableName }}</h2>
+    <button mat-raised-button color="primary" (click)="onNewItem()">
+      <mat-icon>add</mat-icon>
+      New Item
+    </button>
+  </div>
+
+  <!-- Loading state -->
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading...</p>
+    </div>
+  }
+
+  <!-- Error state -->
+  @if (error && !loading) {
+    <div class="error-container">
+      <mat-icon>error</mat-icon>
+      <p>{{ error }}</p>
+    </div>
+  }
+
+  <!-- Empty state -->
+  @if (!loading && !error && dataSource.length === 0) {
+    <div class="empty-container">
+      <mat-icon>inbox</mat-icon>
+      <p>No records found</p>
+      <button mat-stroked-button color="primary" (click)="onNewItem()">
+        Create First Record
+      </button>
+    </div>
+  }
+
+  <!-- Data table -->
+  @if (!loading && !error && dataSource.length > 0) {
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="dataSource" multiTemplateDataRows>
+        <!-- Dynamic columns -->
+        @for (column of columns; track column.column_name) {
+          <ng-container [matColumnDef]="column.column_name">
+            <th mat-header-cell *matHeaderCellDef>{{ getColumnHeader(column) }}</th>
+            <td mat-cell *matCellDef="let row">
+              @if (isBoolColumn(column)) {
+                <mat-icon [class]="getBoolValue(row[column.column_name]) ? 'bool-true' : 'bool-false'">
+                  {{ getBoolValue(row[column.column_name]) ? 'check_circle' : 'cancel' }}
+                </mat-icon>
+              } @else {
+                {{ formatCellValue(column, row[column.column_name]) }}
+              }
+            </td>
+          </ng-container>
+        }
+
+        <!-- Photo column (always defined, only included in displayedColumns when supported) -->
+        <ng-container matColumnDef="photo">
+          <th mat-header-cell *matHeaderCellDef>Photo</th>
+          <td mat-cell *matCellDef="let row">
+            <img [src]="getPhotoUrl(row)"
+                 class="photo-thumbnail"
+                 (error)="$any($event.target).style.display='none'; $any($event.target).nextElementSibling.style.display='inline-flex'"
+                 alt="Photo">
+            <mat-icon class="photo-placeholder" style="display: none">image</mat-icon>
+          </td>
+        </ng-container>
+
+        <!-- Actions column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let row">
+            <div class="actions-row">
+              <button mat-icon-button color="primary" (click)="onEditRow(row); $event.stopPropagation()" title="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="onDeleteRow(row); $event.stopPropagation()" title="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Child tables detail row (spans all columns) -->
+        <ng-container matColumnDef="childTables">
+          <td mat-cell *matCellDef="let row" [attr.colspan]="displayedColumns.length">
+            <div class="child-table-pills">
+              @for (ref of childTableReferences; track ref.childTableName + ref.foreignKey.column_name) {
+                <button class="child-pill" (click)="onNavigateToChild(ref, row); $event.stopPropagation()">
+                  <mat-icon>subdirectory_arrow_right</mat-icon>
+                  {{ ref.childTableFriendlyName }}
+                </button>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['childTables'];"
+            class="child-tables-row"
+            [class.hidden-row]="childTableReferences.length === 0"></tr>
+      </table>
+    </div>
+
+    <!-- Pagination controls -->
+    <div class="pagination-container">
+      <div class="pagination-left">
+        <mat-form-field appearance="outline" class="page-size-select">
+          <mat-label>Page size</mat-label>
+          <mat-select [value]="pageSize" (selectionChange)="onPageSizeChange($event.value)">
+            @for (size of pageSizeOptions; track size) {
+              <mat-option [value]="size">{{ size }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <span class="pagination-info">
+          Showing {{ startRow }} - {{ endRow }} of {{ totalCount }}
+        </span>
+      </div>
+      <div class="pagination-buttons">
+        <button mat-icon-button
+                [disabled]="!canGoPrevious"
+                (click)="goToFirstPage()"
+                title="First page">
+          <mat-icon>first_page</mat-icon>
+        </button>
+        <button mat-icon-button
+                [disabled]="!canGoPrevious"
+                (click)="goToPreviousPage()"
+                title="Previous page">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <span class="page-info">Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+        <button mat-icon-button
+                [disabled]="!canGoNext"
+                (click)="goToNextPage()"
+                title="Next page">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        <button mat-icon-button
+                [disabled]="!canGoNext"
+                (click)="goToLastPage()"
+                title="Last page">
+          <mat-icon>last_page</mat-icon>
+        </button>
+      </div>
+    </div>
+  }
+</div>

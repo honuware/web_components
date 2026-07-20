@@ -1,0 +1,15 @@
+@if (isLoading) {
+<div class="loading">Loading...</div>
+}
+
+@if (!isLoading) {
+<div class="form-fields">
+  @if (readOnly) {
+    <span class="readonly-bool">{{ checkboxControl.value ? 'Yes' : 'No' }}</span>
+  } @else {
+    <mat-checkbox [formControl]="checkboxControl">
+      {{ dataInfo?.label }}
+    </mat-checkbox>
+  }
+</div>
+}

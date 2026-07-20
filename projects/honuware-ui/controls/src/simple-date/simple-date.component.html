@@ -1,0 +1,45 @@
+@if (loading) {
+<p class="loading">Loading...</p>
+}
+
+@if (!loading) {
+<div class="form-fields">
+  @if (type.includes('date')) {
+  <mat-form-field>
+    <mat-label>{{dataInfo?.label}} date</mat-label>
+    <input matInput [formControl]="dateControl" [matDatepicker]="datepicker" />
+    <mat-datepicker-toggle [for]="datepicker" matIconSuffix />
+    <mat-datepicker #datepicker />
+
+    @if (dateControl.getError('required') && !dateControl.hasError('matDatepickerParse')) {
+    <mat-error>This value is required.</mat-error>
+    }
+
+    @if (dateControl.hasError('matDatepickerParse')) {
+    <mat-error>
+      '{{dateControl.getError('matDatepickerParse')?.text}}' is invalid
+    </mat-error>
+    }
+  </mat-form-field>
+  }
+
+  @if (type.includes('time')) {
+  <mat-form-field>
+    <mat-label>{{dataInfo?.label}} time</mat-label>
+    <input matInput [formControl]="dateControl" [matTimepicker]="timePicker" />
+    <mat-timepicker-toggle matIconSuffix [for]="timePicker" />
+    <mat-timepicker #timePicker interval="{{timeIncrementMinutes}}m" />
+
+    @if (dateControl.getError('required') && !dateControl.hasError('matTimepickerParse')) {
+    <mat-error>This value is required.</mat-error>
+    }
+
+    @if (dateControl.hasError('matTimepickerParse')) {
+    <mat-error>
+      '{{dateControl.getError('matTimepickerParse')?.text}}' is invalid
+    </mat-error>
+    }
+  </mat-form-field>
+  }
+</div>
+}

@@ -1,0 +1,60 @@
+:host {
+  display: block;
+}
+
+.parent-button {
+  margin-bottom: 12px;
+}
+
+hw-photo-upload {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 600px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+// Submit/cancel are Material buttons (mat-raised-button color="primary" /
+// mat-stroked-button) — styling is theme-driven, so no color rules here. The
+// .submit-button / .cancel-button classes remain only as stable test hooks.
+
+.nested-tables-section {
+  margin-top: 2rem;
+  max-width: 600px;
+
+  h3 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    color: #333;
+  }
+}
+
+.nested-table-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.nested-table-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.computed-date-toggle {
+  margin-top: -0.5rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+  color: #666;
+}

@@ -1,0 +1,43 @@
+<div
+  class="max-w-[420px] p-6 flex flex-col gap-8 mx-auto my-8 border border-gray-300 rounded-lg"
+>
+  <h1 class="text-center text-2xl">Log In</h1>
+
+  <form [formGroup]="form" (submit)="onSignIn()" class="flex flex-col gap-4">
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input id="email" matInput type="text" formControlName="email" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Password</mat-label>
+      <input id="password"
+             matInput
+             [type]="hidePassword ? 'password' : 'text'"
+             formControlName="password" />
+      <button type="button"
+              matSuffix
+              (click)="togglePasswordVisibility()"
+              class="mr-2">
+        <mat-icon>
+          {{
+          hidePassword ? "visibility_off" : "visibility"
+          }}
+        </mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-checkbox id="remember" formControlName="remember">Remember Me</mat-checkbox>
+
+    <button mat-raised-button id="signIn" color="primary" type="submit">Sign in</button>
+  </form>
+
+  <a
+    id="create-account-link"
+    [routerLink]="'/register'"
+    color="primary"
+    class="text-center"
+  >
+    Create an account
+  </a>
+</div>

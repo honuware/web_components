@@ -1,0 +1,57 @@
+@if (loading) {
+<div>Loading...</div>
+}
+@if (!loading) {
+<!-- Back to Parent button -->
+@if (hasParent) {
+  <button mat-stroked-button class="parent-button" (click)="onNavigateToParent()">
+    <mat-icon>arrow_back</mat-icon>
+    Back to {{ parentFriendlyName }}
+  </button>
+}
+@if (showPhotoUpload) {
+  <hw-photo-upload [tableName]="tableName" [tableItemId]="photoItemId" [deferUpload]="isCreateMode"></hw-photo-upload>
+}
+<form>
+  @for (entry of visibleColumns; track entry.col.column_name; let i = $index) {
+  <hw-composite-control [dataInfo]="entry.col"
+                         [value]="columnValues[entry.index]"
+                         [readOnly]="isReadonlyColumn(entry.col) || isComputedDateAuto(entry.col.column_name)"
+                         [foreignKeyInfo]="getForeignKeyInfo(entry.col)"
+                         (valueChanged)="onValueChanged(i, $event)">
+  </hw-composite-control>
+  @if (getComputedDateRule(entry.col.column_name); as rule) {
+    <div class="computed-date-toggle">
+      <mat-checkbox [checked]="isComputedDateAuto(entry.col.column_name)"
+                    (change)="onToggleComputedDate(entry.col.column_name)">
+        Auto-compute from {{ rule.source }} + {{ rule.offsetMinutes }} min
+      </mat-checkbox>
+    </div>
+  }
+  }
+  <div class="form-actions">
+    <button type="button" mat-raised-button color="primary" class="submit-button" (click)="onSubmit()">
+      {{ isCreateMode ? 'Create' : 'Update' }}
+    </button>
+    @if (returnUrl) {
+      <button type="button" mat-stroked-button class="cancel-button" (click)="onCancel()">
+        Cancel
+      </button>
+    }
+  </div>
+</form>
+<!-- Nested table cards (only in edit mode) -->
+@if (!isCreateMode && childTableReferences.length > 0) {
+  <div class="nested-tables-section">
+    <h3>Related Tables</h3>
+    <div class="nested-table-cards">
+      @for (ref of childTableReferences; track ref.childTableName + ref.foreignKey.column_name) {
+        <button mat-stroked-button class="nested-table-card" (click)="onNavigateToChild(ref)">
+          <mat-icon>subdirectory_arrow_right</mat-icon>
+          {{ ref.childTableFriendlyName }}
+        </button>
+      }
+    </div>
+  </div>
+}
+}

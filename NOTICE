@@ -1,0 +1,16 @@
+@honuware/ui
+Copyright 2026 Mason Bendixen
+
+This product includes software originally developed as part of the
+Knotty Yoga project. The @honuware/ui component library was extracted
+from the knottyyoga repository at commit
+da7ec9f9ff7f46c9120194805ca4bb7d68426411.
+
+This product is licensed under the Apache License, Version 2.0 (the
+"License"); you may not use these files except in compliance with the
+License. A copy of the License is included in the LICENSE file and is
+also available at http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
