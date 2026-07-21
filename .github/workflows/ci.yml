@@ -1,0 +1,101 @@
+name: CI
+
+# PR/push → install, lint, headless-Chrome tests, build, pack (+ upload tarball).
+# Tag (v*) → publish @honuware/ui to the public npm registry with provenance.
+#
+# Secrets/setup required (one-time, by the repo owner):
+#   - NPM_TOKEN: a granular/automation token that can publish to the @honuware
+#     org. Add under Settings → Secrets and variables → Actions.
+#   - Alternatively, configure npm "trusted publishing" (OIDC) for @honuware/ui
+#     on npmjs.com and drop NPM_TOKEN entirely — the `id-token: write` permission
+#     below already satisfies OIDC; just remove the NODE_AUTH_TOKEN env line.
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+# Least privilege by default; the publish job opts into id-token below.
+permissions:
+  contents: read
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint · Test · Build · Pack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Locate Chrome for headless tests
+        run: echo "CHROME_BIN=$(which google-chrome || which google-chrome-stable || echo /usr/bin/google-chrome)" >> "$GITHUB_ENV"
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests (headless Chrome)
+        run: npm test
+
+      - name: Build library
+        run: npm run build
+
+      - name: Pack tarball
+        run: npm pack ./dist/honuware-ui
+
+      - name: Upload tarball artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: honuware-ui-tarball
+          path: '*.tgz'
+          if-no-files-found: error
+
+  publish:
+    name: Publish to npm
+    needs: verify
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # required for npm provenance attestation
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: npm ci
+
+      - name: Build library
+        run: npm run build
+
+      - name: Verify tag matches package version
+        run: |
+          PKG_VERSION="$(node -p "require('./dist/honuware-ui/package.json').version")"
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Tag v$TAG_VERSION does not match package version $PKG_VERSION"
+            exit 1
+          fi
+          echo "Publishing @honuware/ui@$PKG_VERSION"
+
+      - name: Publish (public, with provenance)
+        run: npm publish ./dist/honuware-ui --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
