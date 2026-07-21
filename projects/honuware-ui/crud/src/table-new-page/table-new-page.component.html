@@ -6,8 +6,8 @@
 }
 @if (!loading && !error) {
   <div class="new-page-container">
-    <a [routerLink]="adminHome" class="din text-sm text-blue-600 hover:underline mb-4 inline-block">&larr; Back to admin portal</a>
-    <h1 class="din-condensed-bold text-2xl mb-6">New {{ tableFriendlyName }}</h1>
+    <a [routerLink]="adminHome" class="din back-link">&larr; Back to admin portal</a>
+    <h1 class="din-condensed-bold page-title">New {{ tableFriendlyName }}</h1>
     <hw-composite-row-control
       [tableName]="tableName"
       [columnNames]="columnNames"

@@ -1,9 +1,7 @@
-<div
-  class="max-w-[420px] p-6 flex flex-col gap-8 mx-auto my-8 border border-gray-300 rounded-lg"
->
-  <h1 class="text-center text-2xl">Log In</h1>
+<div class="auth-card">
+  <h1 class="auth-title">Log In</h1>
 
-  <form [formGroup]="form" (submit)="onSignIn()" class="flex flex-col gap-4">
+  <form [formGroup]="form" (submit)="onSignIn()" class="auth-form">
     <mat-form-field appearance="outline">
       <mat-label>Email</mat-label>
       <input id="email" matInput type="text" formControlName="email" />
@@ -18,7 +16,7 @@
       <button type="button"
               matSuffix
               (click)="togglePasswordVisibility()"
-              class="mr-2">
+              class="password-toggle">
         <mat-icon>
           {{
           hidePassword ? "visibility_off" : "visibility"
@@ -36,7 +34,7 @@
     id="create-account-link"
     [routerLink]="'/register'"
     color="primary"
-    class="text-center"
+    class="auth-link"
   >
     Create an account
   </a>

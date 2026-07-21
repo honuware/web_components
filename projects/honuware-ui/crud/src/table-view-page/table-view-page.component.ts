@@ -11,7 +11,8 @@ import { CRUD_EDITOR_ROUTES, CrudEditorRoutes } from '../crud-editor-routes';
   selector: 'hw-table-view-page',
   standalone: true,
   imports: [RouterModule, TableViewControlComponent],
-  templateUrl: './table-view-page.component.html'
+  templateUrl: './table-view-page.component.html',
+  styleUrls: ['./table-view-page.component.scss']
 })
 export class TableViewPageComponent implements OnInit, OnDestroy {
   tableName: string = '';

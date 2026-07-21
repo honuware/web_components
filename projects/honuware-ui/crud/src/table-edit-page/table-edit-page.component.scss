@@ -3,6 +3,27 @@
   max-width: 800px;
 }
 
+// De-Tailwinded back link (was: text-sm text-blue-600 hover:underline mb-4
+// inline-block) and page title (was: text-2xl mb-6). The `din` / `din-condensed-bold`
+// font classes are app-global branding and are kept as-is.
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #2563eb;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.page-title {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
 .edit-card {
   padding: 16px;
   border: 1px solid rgba(0, 0, 0, 0.12);

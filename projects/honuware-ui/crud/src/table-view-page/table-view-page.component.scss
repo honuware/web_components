@@ -1,0 +1,13 @@
+// De-Tailwinded back link (was: text-sm text-blue-600 hover:underline mb-4
+// inline-block). The `din` font class is app-global branding and is kept as-is.
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #2563eb;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

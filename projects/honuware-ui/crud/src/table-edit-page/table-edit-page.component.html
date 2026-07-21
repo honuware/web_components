@@ -12,8 +12,8 @@
 }
 @if (!loading && !error) {
   <div class="edit-page-container">
-    <a [routerLink]="adminHome" class="din text-sm text-blue-600 hover:underline mb-4 inline-block">&larr; Back to admin portal</a>
-    <h1 class="din-condensed-bold text-2xl mb-6">Edit {{ tableFriendlyName }}</h1>
+    <a [routerLink]="adminHome" class="din back-link">&larr; Back to admin portal</a>
+    <h1 class="din-condensed-bold page-title">Edit {{ tableFriendlyName }}</h1>
     <mat-card class="edit-card">
       <mat-card-content>
         <hw-composite-row-control
