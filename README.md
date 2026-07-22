@@ -76,15 +76,26 @@ never `npm publish` by hand. To cut a release:
 git add -A && git commit -m "Release 0.1.1"
 git push
 
-# 3. Tag it — the tag MUST match the manifest version (CI guards this) — and push the tag:
-git tag v0.1.1
-git push origin v0.1.1
+# 3. Tag it, THEN push the tag — these are TWO separate commands.
+#    `git tag` creates the tag locally; `git push origin <tag>` uploads it.
+#    The tag MUST match the manifest version from step 1 (CI guards this).
+git tag v0.1.1            # create the tag first
+git push origin v0.1.1   # push the tag -> this is what triggers the publish
 ```
+
+> **Publishing is a deliberate second step.** A plain `git push` (step 2) only
+> runs CI checks — it does **not** publish. Only pushing a `v*` **tag** publishes.
+>
+> **`error: src refspec v0.1.1 does not match any`** when you run
+> `git push origin v0.1.1` means you skipped `git tag v0.1.1` — the tag doesn't
+> exist locally yet. Create it first (step 3). To move a tag you already made:
+> `git tag -f v0.1.1 && git push -f origin v0.1.1`.
 
 Pushing the tag runs the `verify` job then the `publish` job, which builds
 `dist/honuware-ui`, checks the tag matches `dist/honuware-ui/package.json`, and
 runs `npm publish --provenance --access public`. Watch it under the repo's
 **Actions** tab; when green, `npm view @honuware/ui version` shows the new version.
+(npm rejects republishing an existing version, so each release needs a new number.)
 
 **Then upgrade the consumer** (knottyyoga): in that repo's `ui/`, run
 `npm install @honuware/ui@<version> --save-exact`, re-run `ng build && ng test`,
