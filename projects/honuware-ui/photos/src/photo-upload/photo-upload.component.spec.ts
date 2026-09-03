@@ -121,6 +121,84 @@ describe('PhotoUploadComponent', () => {
     expect(photoAccess.uploadPhoto).not.toHaveBeenCalled();
   });
 
+  // ---- Vector (SVG) uploads ----
+
+  const svgBody =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
+    + '<path d="M4 4h16v16H4z"/></svg>';
+  const svgFile = (name = 'logo.svg', type = 'image/svg+xml') =>
+    new File([svgBody], name, { type });
+
+  // THE test for this change. The canvas path rasterises whatever it is given
+  // and re-encodes it as JPEG, so an SVG that reached it would upload as a
+  // fixed-size photograph — vector gone, transparency flattened, and no error
+  // to show for it. Silently turning the file into something else is worse
+  // than refusing it, which is why this asserts the BYTES as well as the type.
+  // Real async rather than fakeAsync, and a POLL rather than a single tick:
+  // these go through `File.arrayBuffer()`, whose promise zone.js does not
+  // patch. It settles on neither fakeAsync's microtask queue nor in a
+  // guaranteed order against a patched setTimeout, so both flushMicrotasks()
+  // and a lone `await setTimeout(0)` can return with the upload still pending.
+  async function waitUntil(done: () => boolean): Promise<void> {
+    for (let i = 0; i < 50 && !done(); i++) {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+  }
+
+  it('uploads an SVG byte-for-byte instead of rasterising it', async () => {
+    const { c, photoAccess } = make();
+    c.onDrop({
+      preventDefault: () => {}, stopPropagation: () => {},
+      dataTransfer: { files: [svgFile()] },
+    } as unknown as DragEvent);
+    await waitUntil(() => photoAccess.uploadPhoto.calls.any());
+
+    expect(photoAccess.uploadPhoto).toHaveBeenCalled();
+    const [table, id, buffer, imageType] =
+      photoAccess.uploadPhoto.calls.mostRecent().args;
+    expect(table).toBe('classes');
+    expect(id).toBe(3);
+    expect(imageType).toBe('svg');
+    expect(new TextDecoder().decode(buffer as ArrayBuffer)).toBe(svgBody);
+    expect(c.uploading).toBeFalse();
+  });
+
+  // A file dragged from some file managers arrives with an empty MIME type,
+  // and that is exactly the case that would fall through to the canvas.
+  it('treats a .svg with no MIME type as a vector', async () => {
+    const { c, photoAccess } = make();
+    c.onDrop({
+      preventDefault: () => {}, stopPropagation: () => {},
+      dataTransfer: { files: [svgFile('logo.svg', '')] },
+    } as unknown as DragEvent);
+    await waitUntil(() => photoAccess.uploadPhoto.calls.any());
+
+    expect(photoAccess.uploadPhoto.calls.mostRecent().args[3]).toBe('svg');
+  });
+
+  it('still re-encodes a raster through the canvas path', fakeAsync(() => {
+    const { c, photoAccess } = make();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prepare = spyOn<any>(c, 'prepareImageForUpload').and.callThrough();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const isVector = spyOn<any>(c, 'isVector').and.callThrough();
+
+    c.onDrop({
+      preventDefault: () => {}, stopPropagation: () => {},
+      dataTransfer: { files: [jpegFile()] },
+    } as unknown as DragEvent);
+    flushMicrotasks();
+
+    // The vector branch was CONSIDERED and declined — a raster must not take
+    // the byte-for-byte path, or the client-side resize stops happening.
+    expect(prepare).toHaveBeenCalled();
+    expect(isVector).toHaveBeenCalled();
+    expect(isVector.calls.mostRecent().returnValue).toBeFalse();
+    // The 3-byte fake JPEG cannot decode, so this ends in the error branch
+    // rather than an upload — which is itself the proof it went to the canvas.
+    expect(photoAccess.uploadPhoto).not.toHaveBeenCalled();
+  }));
+
   it('onDeletePhoto removes the photo', () => {
     const { c, photoAccess } = make();
     c.hasPhoto = true;

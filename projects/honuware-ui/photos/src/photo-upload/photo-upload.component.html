@@ -29,7 +29,10 @@
         <span>Drag & drop or</span>
         <label class="file-input-label">
           <span>choose file</span>
-          <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
+          <!-- `image/*` already admits image/svg+xml; `.svg` is named as well
+               because a file dragged from some file managers arrives with an
+               empty MIME type, and extension matching is what catches it. -->
+          <input type="file" accept="image/*,.svg" (change)="onFileSelected($event)" hidden>
         </label>
       </div>
 

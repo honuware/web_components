@@ -1,6 +1,6 @@
 {
   "name": "@honuware/ui",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Reusable, brand-free Angular UI + server-access framework.",
   "license": "Apache-2.0",
   "author": "Mason Bendixen",

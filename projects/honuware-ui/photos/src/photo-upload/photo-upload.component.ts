@@ -23,6 +23,8 @@ export class PhotoUploadComponent implements OnInit, OnChanges, OnDestroy {
   // Must match the server's image_max_source_width / image_max_source_height
   // defaults. Images larger than this are resized on the client before upload
   // so they stay under the server's image_max_upload_bytes limit.
+  //
+  // Does not apply to a VECTOR — see isVector.
   private static readonly MAX_IMAGE_DIMENSION = 4096;
 
   photoUrl: string = '';
@@ -139,7 +141,7 @@ export class PhotoUploadComponent implements OnInit, OnChanges, OnDestroy {
       // Without this catch, a decode/encode failure (e.g. an unsupported
       // format such as HEIC, which browsers can't render) would leave the
       // control stuck on "Processing…" with no error and no request.
-      this.error = 'Could not read this image. Try a JPEG or PNG '
+      this.error = 'Could not read this image. Try a JPEG, PNG or SVG '
         + '(formats like HEIC are not supported).';
       this.uploading = false;
       console.error('Error preparing image for upload:', err);
@@ -170,12 +172,37 @@ export class PhotoUploadComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /**
+   * Is this a VECTOR image?
+   *
+   * Checked by MIME type first, falling back to the extension: a drag-and-drop
+   * from some file managers arrives with an empty `type`, and an `.svg` that
+   * reached the canvas path below would be silently destroyed.
+   */
+  private isVector(file: File): boolean {
+    return file.type === 'image/svg+xml' || /\.svg$/i.test(file.name);
+  }
+
+  /**
    * Re-encode the image as JPEG and resize if it exceeds the max dimensions.
    * Converting to JPEG dramatically reduces file size for photographic content
    * (a 25 MB PNG becomes ~1-2 MB JPEG) and keeps uploads under the server's
    * image_max_upload_bytes limit.
+   *
+   * A VECTOR is uploaded byte-for-byte instead, and this is not an
+   * optimisation — it is a correctness fix. The canvas path below RASTERISES
+   * whatever it is given and re-encodes it as JPEG, so an SVG that reached it
+   * would upload as a fixed-size photograph: the vector gone, transparency
+   * flattened, and no error to show for it. Silently turning the file into
+   * something else is worse than refusing it.
+   *
+   * Nothing is resized on the way: a vector has no dimensions to clamp, and
+   * the server's byte cap still applies to what we send.
    */
   private prepareImageForUpload(file: File): Promise<{ buffer: ArrayBuffer; imageType: string }> {
+    if (this.isVector(file)) {
+      return file.arrayBuffer().then(buffer => ({ buffer, imageType: 'svg' }));
+    }
+
     const maxDim = PhotoUploadComponent.MAX_IMAGE_DIMENSION;
 
     return new Promise((resolve, reject) => {
