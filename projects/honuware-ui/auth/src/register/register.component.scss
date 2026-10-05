@@ -30,6 +30,18 @@ mat-form-field {
   width: 100%;
 }
 
+// 44×44 tap target for the show/hide-password eye (was 24×24) — see the same
+// rule in login.component.scss.
 .password-toggle {
-  margin-right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin-right: 0.25rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
 }

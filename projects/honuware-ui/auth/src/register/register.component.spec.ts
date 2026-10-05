@@ -168,4 +168,17 @@ describe('RegisterComponent', () => {
     fixture.detectChanges();
     expect(component.showPasswordMismatch()).toBeFalse();
   });
+
+  // Both show/hide-password eyes were 24×24 — under the 44px a finger needs
+  // (found by the knottyyoga app's mobile audit at 375px).
+  it('gives both show-password buttons a 44×44 tap target', () => {
+    const toggles = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.password-toggle'));
+    expect(toggles.length).toBe(2);
+    for (const toggle of toggles) {
+      const box = toggle.getBoundingClientRect();
+      expect(box.width).toBeGreaterThanOrEqual(44);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+    }
+  });
 });

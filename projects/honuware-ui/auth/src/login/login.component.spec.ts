@@ -134,4 +134,21 @@ describe('LoginComponent', () => {
     const html = (fixture.nativeElement as HTMLElement).innerHTML.toLowerCase();
     expect(html).not.toContain('knotty');
   });
+
+  // Tap targets: 44px is the smallest box a finger reliably hits (Apple HIG /
+  // WCAG 2.5.5). The password eye was 24×24 and the register link 24px tall —
+  // found by the knottyyoga app's mobile audit at 375px.
+  it('gives the show-password button a 44×44 tap target', () => {
+    setup();
+    const toggle = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('.password-toggle')!;
+    const box = toggle.getBoundingClientRect();
+    expect(box.width).toBeGreaterThanOrEqual(44);
+    expect(box.height).toBeGreaterThanOrEqual(44);
+  });
+
+  it('gives the create-account link a 44px-tall tap target', () => {
+    setup();
+    const link = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('#create-account-link')!;
+    expect(link.getBoundingClientRect().height).toBeGreaterThanOrEqual(44);
+  });
 });

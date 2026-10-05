@@ -31,10 +31,29 @@ mat-form-field {
   width: 100%;
 }
 
+// The show/hide-password eye. A bare <button> around a 24px icon was a 24×24
+// tap target — well under the 44px a finger needs (Apple HIG / WCAG 2.5.5) and
+// fiddly on a phone, right next to the field you are typing in. The box grows
+// to 44×44 and stays transparent, so the icon looks exactly as before.
 .password-toggle {
-  margin-right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin-right: 0.25rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
 }
 
+// A full 44px row, not a 24px line of text: it is the only way to the
+// register page from here.
 .auth-link {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
 }
