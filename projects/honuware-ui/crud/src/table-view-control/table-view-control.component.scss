@@ -70,6 +70,17 @@
   width: 80px;
 }
 
+// Mobile UI §5.1 — on a phone the table squeezed every column to its
+// narrowest before it ever scrolled, so a description broke into fragments
+// ("Mix o / streng / trainii") in a 55px column. Below 640px each data column
+// keeps a readable minimum and the wrapper scrolls sideways instead.
+@media (max-width: 639.98px) {
+  .table-wrapper th.mat-mdc-header-cell:not(.mat-column-actions),
+  .table-wrapper td.mat-mdc-cell:not(.mat-column-actions) {
+    min-width: 7rem;
+  }
+}
+
 .actions-row {
   display: flex;
   align-items: center;
@@ -80,10 +91,15 @@
   }
 }
 
+// Wraps (Mobile UI §5.1): page size + "1–25 of 312" + four page buttons need
+// ~470px, so on a phone the buttons ran ~100px off the screen. They now drop
+// to their own row; a wide table view is unchanged.
 .pagination-container {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: 4px 16px;
   padding: 8px 0;
   border-top: 1px solid #e0e0e0;
 }
@@ -105,6 +121,7 @@
 .pagination-info {
   color: #666;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .pagination-buttons {
@@ -116,6 +133,7 @@
 .page-info {
   padding: 0 12px;
   font-size: 14px;
+  white-space: nowrap;
 }
 
 .bool-true {

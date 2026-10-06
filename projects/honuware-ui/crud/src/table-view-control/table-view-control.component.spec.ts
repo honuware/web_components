@@ -281,6 +281,35 @@ describe('TableViewControlComponent', () => {
     expect(component.totalPages).toBeGreaterThan(0);
   }));
 
+  // Mobile UI §5.1: page size + range + four page buttons need ~470px, so at
+  // phone width the buttons ran ~100px off the screen.
+  it('wraps the pager onto a second row at phone width instead of overflowing', fakeAsync(() => {
+    component.tableName = 'classes';
+    component.pageSize = 2;
+    component.pageOffset = 0;
+    const host = fixture.nativeElement as HTMLElement;
+    host.style.display = 'block';
+    host.style.width = '343px';
+    fixture.detectChanges();
+    schemaSubject.next(mockSchema);
+    tick();
+    fixture.detectChanges();
+
+    const container = host.querySelector<HTMLElement>('.pagination-container')!.getBoundingClientRect();
+    const buttons = host.querySelector<HTMLElement>('.pagination-buttons')!.getBoundingClientRect();
+    expect(buttons.right).toBeLessThanOrEqual(container.right + 0.5);
+    expect(buttons.left).toBeGreaterThanOrEqual(container.left - 0.5);
+    // ...and its text stays whole ("Page 1 of 1" had wrapped onto 3 lines).
+    for (const selector of ['.pagination-info', '.page-info']) {
+      const element = host.querySelector<HTMLElement>(selector)!;
+      const style = getComputedStyle(element);
+      // line-height may be 'normal' (NaN) — then ~1.5x the font size.
+      const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.5;
+      const lines = Math.round(element.getBoundingClientRect().height / lineHeight);
+      expect(lines).withContext(selector).toBe(1);
+    }
+  }));
+
   it('should navigate to next page', fakeAsync(() => {
     component.tableName = 'classes';
     component.pageSize = 2;
