@@ -1,0 +1,23 @@
+<div class="auth-card">
+  <h1 class="auth-title">Check your email</h1>
+
+  <div class="check-email-body">
+    @if (email) {
+      <p data-test="sent-to">
+        We've sent an activation link to <strong>{{ email }}</strong>.
+      </p>
+    } @else {
+      <p data-test="sent-to">
+        We've sent an activation link to the email address you registered with.
+      </p>
+    }
+    <p>Click the link in that email to activate your account, then log in.</p>
+    <p class="spam-note" data-test="spam-note">
+      Don't see it within a few minutes? Check your <strong>spam or junk</strong> folder.
+    </p>
+  </div>
+
+  <button id="GoToLogin" mat-raised-button color="primary" type="button" (click)="goToLogin()">
+    Go to login
+  </button>
+</div>

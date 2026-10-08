@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RegisterComponent } from './register.component';
 import { Router } from '@angular/router';
-import { of, Observable } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { of, Observable, throwError } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { AuthService } from '../auth.service';
 import { AuthData } from '../auth.types';
+import { AUTH_ROUTES, DEFAULT_AUTH_ROUTES } from '../auth-routes';
 import { AuthAccess, LoginInfo, UserInfo, HONUWARE_AUTH_ACCESS } from '@honuware/ui/access';
 
 describe('RegisterComponent', () => {
@@ -73,7 +75,23 @@ describe('RegisterComponent', () => {
     expect(html).not.toContain('knotty');
   });
 
-  it('should navigate to /login on successful register', () => {
+  function fillAndSubmit(target: ComponentFixture<RegisterComponent>, email: string): void {
+    const page: HTMLElement = target.nativeElement;
+    const values: Record<string, string> = {
+      '#email': email, '#first_name': 'John', '#last_name': 'Doe',
+      '#password': 'Secret123', '#password2': 'Secret123',
+    };
+    for (const [selector, value] of Object.entries(values)) {
+      const input = page.querySelector<HTMLInputElement>(selector)!;
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+    }
+    target.detectChanges();
+    page.querySelector<HTMLButtonElement>('#Register')!.click();
+    target.detectChanges();
+  }
+
+  it('should navigate to the check-email page, carrying the address, on successful register', () => {
     const emailInput: HTMLInputElement = fixture.nativeElement.querySelector('#email');
     const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('#first_name');
     const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('#last_name');
@@ -96,10 +114,54 @@ describe('RegisterComponent', () => {
     registerButton.click();
     fixture.detectChanges();
 
+    expect(routerSpy.navigate).toHaveBeenCalledWith(
+      ['/check-email'], { state: { email: 'john@example.com' } });
+  });
+
+  // An app whose AuthRoutes predates checkEmailPath (CommunityFinder supplies
+  // its own object) keeps the old behaviour: straight to the login page.
+  it('goes straight to login when no check-email page is configured', () => {
+    TestBed.resetTestingModule();
+    const routesWithoutCheckEmail = { ...DEFAULT_AUTH_ROUTES };
+    delete routesWithoutCheckEmail.checkEmailPath;
+    TestBed.configureTestingModule({
+      imports: [RegisterComponent],
+      providers: [
+        AuthService,
+        { provide: HONUWARE_AUTH_ACCESS, useValue: makeFakeAuthAccess() },
+        { provide: Router, useValue: routerSpy },
+        { provide: AUTH_ROUTES, useValue: routesWithoutCheckEmail },
+      ]
+    });
+    const legacyFixture = TestBed.createComponent(RegisterComponent);
+    legacyFixture.detectChanges();
+    fillAndSubmit(legacyFixture, 'john@example.com');
+
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
   });
 
-  it('fills form, submits, navigates to login, then login updates authData with registered values', (done) => {
+  it('does not navigate anywhere when registration fails', () => {
+    const failingAccess = makeFakeAuthAccess();
+    failingAccess.register = () => throwError(() => new HttpErrorResponse({ status: 400 }));
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [RegisterComponent],
+      providers: [
+        AuthService,
+        { provide: HONUWARE_AUTH_ACCESS, useValue: failingAccess },
+        { provide: Router, useValue: routerSpy },
+      ]
+    });
+    const failingFixture = TestBed.createComponent(RegisterComponent);
+    failingFixture.detectChanges();
+    fillAndSubmit(failingFixture, 'john@example.com');
+
+    // "Check your email" after a failed registration would send people to
+    // wait for a message that is never coming.
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
+  });
+
+  it('fills form, submits, navigates to check-email, then login updates authData with registered values', (done) => {
     const emailInput: HTMLInputElement = fixture.nativeElement.querySelector('#email');
     const firstNameInput: HTMLInputElement = fixture.nativeElement.querySelector('#first_name');
     const lastNameInput: HTMLInputElement = fixture.nativeElement.querySelector('#last_name');
@@ -127,7 +189,7 @@ describe('RegisterComponent', () => {
     registerButton.click();
     fixture.detectChanges();
 
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/login']);
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/check-email'], { state: { email } });
 
     // Now simulate login and check authData$
     authService.login(email, password, false).subscribe({

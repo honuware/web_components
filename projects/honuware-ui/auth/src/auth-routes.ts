@@ -10,6 +10,14 @@ export interface AuthRoutes {
   /** Where the register page lives. */
   registerPath: string;
   /**
+   * The "check your email for the activation link" page that registration
+   * leads to (CheckEmailComponent). The consumer must route this path to
+   * CheckEmailComponent. Optional so an existing AuthRoutes object keeps
+   * compiling: when absent, registration goes straight to `loginPath`, as it
+   * did before this page existed.
+   */
+  checkEmailPath?: string;
+  /**
    * Home path — used both after logout and as the "access denied" fallback
    * for guard checks that reject the current user.
    */
@@ -26,6 +34,7 @@ export interface AuthRoutes {
 export const DEFAULT_AUTH_ROUTES: AuthRoutes = {
   loginPath: '/login',
   registerPath: '/register',
+  checkEmailPath: '/check-email',
   postLogoutPath: '/',
   mustChangePasswordPath: '/my/update-user-password',
   returnUrlAllowlist: ['/my', '/admin', '/manage', '/staff', '/calendar', '/shop'],

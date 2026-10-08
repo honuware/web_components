@@ -81,7 +81,12 @@ export class RegisterComponent {
     const password = this.form.get('password')?.value ?? '';
 
     this.authService.register(firstName, lastName, email, password).subscribe({
-      next: () => this.router.navigate([this.authRoutes.loginPath]),
+      // To the "check your email" page when the consumer routes one (the
+      // address rides along as history state so the page can name it);
+      // otherwise straight to login, as before checkEmailPath existed.
+      next: () => this.authRoutes.checkEmailPath
+        ? this.router.navigate([this.authRoutes.checkEmailPath], { state: { email } })
+        : this.router.navigate([this.authRoutes.loginPath]),
       error: (err: HttpErrorResponse) => {
         const problem = this.errorService.parseError(err);
         this.toastService.error(this.errorService.getUserFriendlyMessage(problem));
