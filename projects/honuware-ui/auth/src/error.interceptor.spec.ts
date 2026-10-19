@@ -81,6 +81,13 @@ describe('ErrorInterceptor', () => {
     expect(routerSpy.navigate).not.toHaveBeenCalled();
   });
 
+  it('does not redirect when not authenticated on the forgot-password endpoints', async () => {
+    configure();
+    await fire('/api/forgot_password', problem(ErrorTypes.NOT_AUTHENTICATED, 401), 401);
+    await fire('/api/reset_password', problem(ErrorTypes.NOT_AUTHENTICATED, 401), 401);
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
+  });
+
   it('does not redirect for non-auth errors and attaches parsed problemDetails', async () => {
     configure();
     const err = await fire('/api/add_item', problem(ErrorTypes.VALIDATION_ERROR, 400), 400);

@@ -1,8 +1,9 @@
 /*
  * @honuware/ui/auth — the auth layer: AuthService + AuthData/permission
  * helpers, the five route guards, the ErrorInterceptor, the login/register/
- * check-email/verify pages (selectors `hw-`), the AUTH_ROUTES config token, and the
- * tryTokenLogin bootstrap initializer. Depends on foundation + access.
+ * check-email/verify/forgot-password/reset-password pages (selectors `hw-`), the
+ * AUTH_ROUTES config token, and the tryTokenLogin bootstrap initializer.
+ * Depends on foundation + access.
  */
 export { AuthService } from './auth.service';
 
@@ -21,5 +22,7 @@ export { LoginComponent } from './login/login.component';
 export { RegisterComponent } from './register/register.component';
 export { VerifyComponent } from './verify/verify.component';
 export { CheckEmailComponent } from './check-email/check-email.component';
+export { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
+export { ResetPasswordComponent } from './reset-password/reset-password.component';
 
 export { tryTokenLoginInitializer } from './try-token-login';

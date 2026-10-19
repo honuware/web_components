@@ -49,6 +49,16 @@ mat-form-field {
   cursor: pointer;
 }
 
+// Sits right under the password field, at its right edge, with a full 44px
+// tap target.
+.forgot-password-link {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: -0.75rem;
+}
+
 // A full 44px row, not a 24px line of text: it is the only way to the
 // register page from here.
 .auth-link {

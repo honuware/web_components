@@ -72,6 +72,8 @@ export class HonuwareAccessProxy implements CrudAccess, AuthAccess, PhotoAccess 
   getUserInfo(): Observable<UserInfo> { return this.serialize(() => this.auth.getUserInfo()); }
   setUserInfo(userInfo: SetUserInfo): Observable<void> { return this.serialize(() => this.auth.setUserInfo(userInfo)); }
   updateUserPassword(passwordInfo: UpdateUserPasswordInfo): Observable<void> { return this.serialize(() => this.auth.updateUserPassword(passwordInfo)); }
+  forgotPassword(email: string): Observable<void> { return this.serialize(() => this.auth.forgotPassword(email)); }
+  resetPassword(email: string, secret: string, newPassword: string): Observable<void> { return this.serialize(() => this.auth.resetPassword(email, secret, newPassword)); }
 
   // --- PhotoAccess ---
   uploadPhoto(t: string, id: number, data: ArrayBuffer, type: string): Observable<SourcePhotoInfo> { return this.serialize(() => this.photo.uploadPhoto(t, id, data, type)); }

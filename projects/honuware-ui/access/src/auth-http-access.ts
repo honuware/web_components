@@ -54,4 +54,16 @@ export class AuthHttpAccess implements AuthAccess {
   updateUserPassword(passwordInfo: UpdateUserPasswordInfo): Observable<void> {
     return this.http.post(`${this.base}/update_user_password`, passwordInfo, { withCredentials: true }).pipe(map(() => void 0));
   }
+
+  forgotPassword(email: string): Observable<void> {
+    return this.http.post(`${this.base}/forgot_password`, { email }, { withCredentials: true }).pipe(map(() => void 0));
+  }
+
+  resetPassword(email: string, secret: string, newPassword: string): Observable<void> {
+    return this.http.post(`${this.base}/reset_password`, {
+      email,
+      secret,
+      new_password: newPassword,
+    }, { withCredentials: true }).pipe(map(() => void 0));
+  }
 }

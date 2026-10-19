@@ -40,6 +40,24 @@ describe('AuthHttpAccess', () => {
     req.flush(null);
   });
 
+  it('forgotPassword POSTs the email to /api/forgot_password', () => {
+    svc.forgotPassword('ada@x.io').subscribe();
+    const req = http.expectOne('/api/forgot_password');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ email: 'ada@x.io' });
+    req.flush(null);
+  });
+
+  it('resetPassword POSTs a snake_cased body to /api/reset_password', () => {
+    let done = false;
+    svc.resetPassword('ada@x.io', 'the-secret', 'new-pw').subscribe(() => (done = true));
+    const req = http.expectOne('/api/reset_password');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ email: 'ada@x.io', secret: 'the-secret', new_password: 'new-pw' });
+    req.flush(null);
+    expect(done).toBeTrue();
+  });
+
   it('getUserInfo POSTs /api/get_user_info', () => {
     svc.getUserInfo().subscribe();
     const req = http.expectOne('/api/get_user_info');

@@ -55,7 +55,12 @@ export class ErrorInterceptor implements HttpInterceptor {
   }
 
   private isAuthEndpoint(url: string): boolean {
-    const authEndpoints = ['/api/login', '/api/register', '/api/me', '/api/remember'];
+    // The forgot-password pair serve someone who isn't signed in; a 401 from
+    // them must not bounce that person to the login page they just left.
+    const authEndpoints = [
+      '/api/login', '/api/register', '/api/me', '/api/remember',
+      '/api/forgot_password', '/api/reset_password',
+    ];
     return authEndpoints.some((endpoint) => url.includes(endpoint));
   }
 }

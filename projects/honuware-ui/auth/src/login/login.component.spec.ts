@@ -5,6 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { AuthService } from '../auth.service';
+import { AUTH_ROUTES, AuthRoutes, DEFAULT_AUTH_ROUTES } from '../auth-routes';
 import { AuthAccess, UserInfo, HONUWARE_AUTH_ACCESS } from '@honuware/ui/access';
 
 describe('LoginComponent', () => {
@@ -27,7 +28,7 @@ describe('LoginComponent', () => {
     must_change_password: false,
   } as UserInfo;
 
-  function setup(returnUrl?: string): void {
+  function setup(returnUrl?: string, routes?: AuthRoutes): void {
     authAccess = jasmine.createSpyObj<AuthAccess>('AuthAccess', ['login', 'getUserInfo']);
     authAccess.login.and.returnValue(of(void 0));
     authAccess.getUserInfo.and.returnValue(of(DEFAULT_USER));
@@ -45,6 +46,7 @@ describe('LoginComponent', () => {
           provide: ActivatedRoute,
           useValue: { snapshot: { queryParamMap } },
         },
+        ...(routes ? [{ provide: AUTH_ROUTES, useValue: routes }] : []),
       ],
     });
 
@@ -150,5 +152,44 @@ describe('LoginComponent', () => {
     setup();
     const link = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('#create-account-link')!;
     expect(link.getBoundingClientRect().height).toBeGreaterThanOrEqual(44);
+  });
+
+  // Finishing website Phase 11: the way into forgot password.
+  describe('Forgot password? link', () => {
+    function forgotLink(): HTMLAnchorElement | null {
+      return (fixture.nativeElement as HTMLElement)
+        .querySelector<HTMLAnchorElement>('#forgot-password-link');
+    }
+
+    it('sits beneath the password field and opens the forgot-password page', () => {
+      setup();
+      const link = forgotLink();
+      expect(link).not.toBeNull();
+      expect(link!.textContent!.trim()).toBe('Forgot password?');
+      expect(link!.getAttribute('href')).toBe(DEFAULT_AUTH_ROUTES.forgotPasswordPath!);
+
+      const passwordField = (fixture.nativeElement as HTMLElement)
+        .querySelector('#password')!.closest('mat-form-field')!;
+      expect(passwordField.compareDocumentPosition(link!) & Node.DOCUMENT_POSITION_FOLLOWING)
+        .toBeTruthy();
+      const checkbox = (fixture.nativeElement as HTMLElement).querySelector('#remember')!;
+      expect(link!.compareDocumentPosition(checkbox) & Node.DOCUMENT_POSITION_FOLLOWING)
+        .toBeTruthy();
+    });
+
+    it('follows a remapped forgotPasswordPath', () => {
+      setup(undefined, { ...DEFAULT_AUTH_ROUTES, forgotPasswordPath: '/account/forgot' });
+      expect(forgotLink()!.getAttribute('href')).toBe('/account/forgot');
+    });
+
+    it('is left out when the consumer routes no forgot-password page', () => {
+      setup(undefined, { ...DEFAULT_AUTH_ROUTES, forgotPasswordPath: undefined });
+      expect(forgotLink()).toBeNull();
+    });
+
+    it('has a 44px-tall tap target', () => {
+      setup();
+      expect(forgotLink()!.getBoundingClientRect().height).toBeGreaterThanOrEqual(44);
+    });
   });
 });

@@ -47,4 +47,10 @@ export interface AuthAccess {
   getUserInfo(): Observable<UserInfo>;
   setUserInfo(userInfo: SetUserInfo): Observable<void>;
   updateUserPassword(passwordInfo: UpdateUserPasswordInfo): Observable<void>;
+  // POST /api/forgot_password with `{ email }`. Succeeds whether or not the
+  // address has an account — the server never says which.
+  forgotPassword(email: string): Observable<void>;
+  // POST /api/reset_password with `{ email, secret, new_password }`, from the
+  // link the forgot-password mail carries.
+  resetPassword(email: string, secret: string, newPassword: string): Observable<void>;
 }

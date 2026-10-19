@@ -45,4 +45,15 @@ describe('HonuwareAccessProxy', () => {
     http.expectOne('/api/me').flush(null);
     http.expectOne('/api/has_photo/classes/1').flush({ has_photo: false });
   });
+
+  it('queues the forgot- and reset-password calls like every other', () => {
+    proxy.forgotPassword('a@b.c').subscribe();
+    proxy.resetPassword('a@b.c', 's', 'pw').subscribe();
+
+    expect(http.match('/api/reset_password').length).toBe(0);
+    http.expectOne('/api/forgot_password').flush(null);
+    const reset = http.expectOne('/api/reset_password');
+    expect(reset.request.body).toEqual({ email: 'a@b.c', secret: 's', new_password: 'pw' });
+    reset.flush(null);
+  });
 });

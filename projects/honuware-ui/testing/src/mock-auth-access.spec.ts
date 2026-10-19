@@ -1,4 +1,4 @@
-import { UserInfo } from '@honuware/ui/access';
+import { AuthAccess, UserInfo } from '@honuware/ui/access';
 import { MockAuthAccess } from './mock-auth-access';
 
 // The mock's observables are synchronous (`of` / `throwError`), so subscribe
@@ -108,6 +108,52 @@ describe('MockAuthAccess', () => {
     let loggedIn = false;
     auth.login({ email: 'sample@example.com', password: 'new', remember: false }).subscribe(() => (loggedIn = true));
     expect(loggedIn).toBeTrue();
+  });
+
+  it('forgotPassword answers the same for a known and an unknown address', () => {
+    // Called through the interface, as the app calls it: the mock ignores the
+    // address, so its own signature takes none.
+    const auth: AuthAccess = new MockAuthAccess({ users: [{ user: sampleUser(), password: 'pw' }] });
+    let known = false;
+    let unknown = false;
+    auth.forgotPassword('sample@example.com').subscribe(() => (known = true));
+    auth.forgotPassword('nobody@example.com').subscribe(() => (unknown = true));
+    expect(known).toBeTrue();
+    expect(unknown).toBeTrue();
+  });
+
+  it('resetPassword sets the new password and signs the account out', () => {
+    const auth = new MockAuthAccess({
+      users: [{ user: { ...sampleUser(), must_change_password: true }, password: 'pw' }],
+    });
+    auth.login({ email: 'sample@example.com', password: 'pw', remember: true }).subscribe();
+
+    let ok = false;
+    auth.resetPassword('sample@example.com', 'any-secret', 'fresh').subscribe(() => (ok = true));
+    expect(ok).toBeTrue();
+
+    let me: number | undefined;
+    auth.me().subscribe({ error: (e) => (me = e.status) });
+    expect(me).toBe(401);
+    let remembered: number | undefined;
+    auth.remember().subscribe({ error: (e) => (remembered = e.status) });
+    expect(remembered).toBe(401);
+
+    let oldPassword: number | undefined;
+    auth.login({ email: 'sample@example.com', password: 'pw', remember: false })
+      .subscribe({ error: (e) => (oldPassword = e.status) });
+    expect(oldPassword).toBe(401);
+    let user: UserInfo | undefined;
+    auth.login({ email: 'sample@example.com', password: 'fresh', remember: false }).subscribe();
+    auth.getUserInfo().subscribe((u) => (user = u));
+    expect(user?.must_change_password).toBeFalse();
+  });
+
+  it('resetPassword rejects an unknown address with a 400', () => {
+    const auth = new MockAuthAccess();
+    let status: number | undefined;
+    auth.resetPassword('nobody@example.com', 's', 'pw').subscribe({ error: (e) => (status = e.status) });
+    expect(status).toBe(400);
   });
 });
 

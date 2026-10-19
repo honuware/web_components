@@ -10,8 +10,11 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     // Narrow AuthAccess seam — no ServerAccessMock, no app network layer.
-    authAccess = jasmine.createSpyObj<AuthAccess>('AuthAccess', ['logout']);
+    authAccess = jasmine.createSpyObj<AuthAccess>(
+      'AuthAccess', ['logout', 'forgotPassword', 'resetPassword']);
     authAccess.logout.and.returnValue(of(void 0));
+    authAccess.forgotPassword.and.returnValue(of(void 0));
+    authAccess.resetPassword.and.returnValue(of(void 0));
 
     TestBed.configureTestingModule({
       providers: [
@@ -49,6 +52,14 @@ describe('AuthService', () => {
     expect(authAccess.logout).toHaveBeenCalled();
     expect(service.authData.isAuth).toBeFalse();
   }));
+
+  it('forgotPassword() and resetPassword() pass straight through to the server', () => {
+    service.forgotPassword('a@b.c').subscribe();
+    service.resetPassword('a@b.c', 'the-secret', 'new-pw').subscribe();
+
+    expect(authAccess.forgotPassword).toHaveBeenCalledOnceWith('a@b.c');
+    expect(authAccess.resetPassword).toHaveBeenCalledOnceWith('a@b.c', 'the-secret', 'new-pw');
+  });
 });
 
 // Phase 10.1 of the security review: tryTokenLogin is the bootstrap-

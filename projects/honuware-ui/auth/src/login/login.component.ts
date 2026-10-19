@@ -36,6 +36,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class LoginComponent {
   form: FormGroup;
   hidePassword = true;
+  /** Where **Forgot password?** goes; no link when the consumer routes none. */
+  readonly forgotPasswordPath: string | undefined;
   private returnUrl: string;
 
   constructor(
@@ -52,6 +54,7 @@ export class LoginComponent {
       password: ['', [Validators.required]],
       remember: [false],
     });
+    this.forgotPasswordPath = this.authRoutes.forgotPasswordPath;
     // Phase 10.2: never trust the raw query parameter — see
     // sanitizeReturnUrl above for the threat model.
     this.returnUrl = sanitizeReturnUrl(

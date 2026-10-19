@@ -25,6 +25,12 @@
       </button>
     </mat-form-field>
 
+    @if (forgotPasswordPath) {
+      <a id="forgot-password-link" class="forgot-password-link" [routerLink]="forgotPasswordPath">
+        Forgot password?
+      </a>
+    }
+
     <mat-checkbox id="remember" formControlName="remember">Remember Me</mat-checkbox>
 
     <button mat-raised-button id="signIn" color="primary" type="submit">Sign in</button>

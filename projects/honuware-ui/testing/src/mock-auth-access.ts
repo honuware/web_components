@@ -110,6 +110,25 @@ export class MockAuthAccess implements AuthAccess {
     return of(void 0);
   }
 
+  forgotPassword(): Observable<void> {
+    // Like the server: the same answer whether or not the address is known.
+    return of(void 0);
+  }
+
+  resetPassword(email: string, secret: string, newPassword: string): Observable<void> {
+    // Every link for a known account is valid, as with verify(); an unknown
+    // address gets the server's generic 400. The reset signs everyone out.
+    const stored = this.users.get(email);
+    if (!stored || !secret || !newPassword) {
+      return throwError(() => ({ status: 400, message: 'reset link is invalid or expired' }));
+    }
+    stored.password = newPassword;
+    stored.user = { ...stored.user, must_change_password: false };
+    if (this.currentEmail === email) this.currentEmail = null;
+    if (this.rememberedEmail === email) this.rememberedEmail = null;
+    return of(void 0);
+  }
+
   /**
    * Test helper (not part of AuthAccess): drop the active session but keep the
    * "remember me" token — so a subsequent `me()` rejects and `remember()` can

@@ -137,4 +137,13 @@ export class AuthService {
   public verify(email: string, secret: string): Observable<void> {
     return this.authAccess.verify(email, secret);
   }
+
+  // Forgot password: the first asks for a reset link, the second uses it.
+  public forgotPassword(email: string): Observable<void> {
+    return this.authAccess.forgotPassword(email);
+  }
+
+  public resetPassword(email: string, secret: string, newPassword: string): Observable<void> {
+    return this.authAccess.resetPassword(email, secret, newPassword);
+  }
 }

@@ -18,6 +18,17 @@ export interface AuthRoutes {
    */
   checkEmailPath?: string;
   /**
+   * The "send me a reset link" page (ForgotPasswordComponent), linked from
+   * the login page as **Forgot password?**. Optional for the same reason as
+   * `checkEmailPath`: when absent, the login page shows no link.
+   */
+  forgotPasswordPath?: string;
+  /**
+   * Where the reset mail's link lands (ResetPasswordComponent). It must match
+   * the server's `password_reset_link` setting (default "reset-password").
+   */
+  resetPasswordPath?: string;
+  /**
    * Home path — used both after logout and as the "access denied" fallback
    * for guard checks that reject the current user.
    */
@@ -35,6 +46,8 @@ export const DEFAULT_AUTH_ROUTES: AuthRoutes = {
   loginPath: '/login',
   registerPath: '/register',
   checkEmailPath: '/check-email',
+  forgotPasswordPath: '/forgot-password',
+  resetPasswordPath: '/reset-password',
   postLogoutPath: '/',
   mustChangePasswordPath: '/my/update-user-password',
   returnUrlAllowlist: ['/my', '/admin', '/manage', '/staff', '/calendar', '/shop'],
