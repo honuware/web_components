@@ -84,8 +84,10 @@ export class CrudHttpAccess implements CrudAccess {
     return this.http.post(`${this.base}/update_item`, body, { withCredentials: true }).pipe(map(() => void 0));
   }
 
+  // POST, never GET: the server's route is POST only, so the delete carries
+  // the CSRF token like every other write.
   deleteItem(tableName: string, columnName: string, columnValue: string): Observable<void> {
-    return this.http.get(`${this.base}/delete_item/${tableName}/${columnName}/${columnValue}`, { withCredentials: true })
+    return this.http.post(`${this.base}/delete_item/${tableName}/${columnName}/${columnValue}`, null, { withCredentials: true })
       .pipe(map(() => void 0));
   }
 

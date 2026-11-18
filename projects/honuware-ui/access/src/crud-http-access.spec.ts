@@ -50,10 +50,11 @@ describe('CrudHttpAccess', () => {
     req.flush({ total_count: 0, options: [] });
   });
 
-  it('deleteItem GETs the delete_item path', () => {
+  it('deleteItem POSTs the delete_item path, never GET', () => {
     svc.deleteItem('classes', 'id', '3').subscribe();
     const req = http.expectOne('/api/delete_item/classes/id/3');
-    expect(req.request.method).toBe('GET');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.withCredentials).toBeTrue();
     req.flush(null);
   });
 
