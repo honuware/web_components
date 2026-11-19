@@ -1,0 +1,66 @@
+<section class="image-upload-settings" aria-labelledby="hw-image-upload-settings-title">
+  <h2 id="hw-image-upload-settings-title" class="image-upload-settings__title">Image uploads</h2>
+
+  @if (loading) {
+    <div class="image-upload-settings__loading">
+      <mat-spinner diameter="24" aria-label="Loading the upload limit"></mat-spinner>
+    </div>
+  } @else if (loadFailed) {
+    <p class="image-upload-settings__error" role="alert">The upload limit couldn't be loaded.</p>
+    <button mat-stroked-button type="button" (click)="load()">Try again</button>
+  } @else {
+    <p class="image-upload-settings__intro">
+      The largest image anyone can upload. Photos are shrunk before they're sent, so most are
+      well under it. Now {{ currentLabel }}; the default is {{ defaultLabel }}.
+    </p>
+
+    <form class="image-upload-settings__form" [formGroup]="form" (ngSubmit)="save()">
+      <mat-form-field appearance="outline">
+        <mat-label>Upload limit (MB)</mat-label>
+        <input
+          matInput
+          type="number"
+          inputmode="numeric"
+          step="1"
+          [min]="minimumMegabytes"
+          [max]="maximumMegabytes"
+          formControlName="megabytes"
+          aria-describedby="hw-image-upload-settings-hint"
+        />
+        <mat-hint id="hw-image-upload-settings-hint">
+          {{ minimumMegabytes }} to {{ maximumMegabytes }} MB
+        </mat-hint>
+      </mat-form-field>
+
+      @if (megabytes.touched && problem) {
+        <p class="image-upload-settings__error" role="alert">{{ problem }}</p>
+      }
+
+      <div class="image-upload-settings__actions">
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="saving || unchanged"
+        >
+          Save
+        </button>
+        <button mat-stroked-button type="button" (click)="useDefault()" [disabled]="saving">
+          Use the default
+        </button>
+        @if (saving) {
+          <mat-spinner diameter="20" aria-label="Saving"></mat-spinner>
+        }
+      </div>
+
+      <p class="image-upload-settings__status" aria-live="polite">
+        @if (saved) {
+          Saved. The limit is now {{ currentLabel }}.
+        }
+      </p>
+      @if (saveError) {
+        <p class="image-upload-settings__error" role="alert">{{ saveError }}</p>
+      }
+    </form>
+  }
+</section>

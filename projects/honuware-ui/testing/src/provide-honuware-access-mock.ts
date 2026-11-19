@@ -3,11 +3,13 @@ import { provideHonuwareAccess } from '@honuware/ui/access';
 import { MockCrudAccess, MockCrudAccessOptions } from './mock-crud-access';
 import { MockAuthAccess, MockAuthAccessOptions } from './mock-auth-access';
 import { MockPhotoAccess } from './mock-photo-access';
+import { MockImageUploadSettingsAccess } from './mock-image-upload-settings-access';
 
 export interface HonuwareAccessMocks {
   crud: MockCrudAccess;
   auth: MockAuthAccess;
   photo: MockPhotoAccess;
+  imageUploadSettings: MockImageUploadSettingsAccess;
 }
 
 export interface ProvideHonuwareAccessMockOptions {
@@ -34,6 +36,7 @@ export function provideHonuwareAccessMock(
     crud: new MockCrudAccess(options.crud),
     auth: new MockAuthAccess(options.auth),
     photo: new MockPhotoAccess(),
+    imageUploadSettings: new MockImageUploadSettingsAccess(),
   };
   capture?.(mocks);
   return provideHonuwareAccess({
@@ -41,5 +44,6 @@ export function provideHonuwareAccessMock(
     crud: mocks.crud,
     auth: mocks.auth,
     photo: mocks.photo,
+    imageUploadSettings: mocks.imageUploadSettings,
   });
 }

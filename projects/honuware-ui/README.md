@@ -17,13 +17,13 @@ Peer dependencies (Angular 21 — install if you don't already have them): `@ang
 | Entry | What's in it |
 |---|---|
 | `@honuware/ui/foundation` | `ToastService`, `hw-confirm-dialog`, fuse animations, microsecond date-formatting utils, `sanitizeReturnUrl`. No internal deps. |
-| `@honuware/ui/access` | The narrow `CrudAccess` / `AuthAccess` / `PhotoAccess` interfaces + `HONUWARE_*_ACCESS` tokens; framework DTOs (`DatabaseSchema`, `DataResults`, `ColumnDataInfo`, admin/photo types, `UserInfo`/`LoginInfo`…); the RFC 7807 stack (`ProblemDetails`, `ErrorService`); `CsrfInterceptor`; `PhotoUrlBuilder`; the request-serializing proxy + default HTTP implementations; and `provideHonuwareAccess()`. |
+| `@honuware/ui/access` | The narrow `CrudAccess` / `AuthAccess` / `PhotoAccess` / `ImageUploadSettingsAccess` interfaces + `HONUWARE_*_ACCESS` tokens; framework DTOs (`DatabaseSchema`, `DataResults`, `ColumnDataInfo`, admin/photo types, `UserInfo`/`LoginInfo`…); the RFC 7807 stack (`ProblemDetails`, `ErrorService`); `CsrfInterceptor`; `PhotoUrlBuilder`; the request-serializing proxy + default HTTP implementations; and `provideHonuwareAccess()`. |
 | `@honuware/ui/controls` | Schema-driven field controls (`hw-simple-text` / `-long-text` / `-simple-bool` / `-simple-enum` / `-simple-date`), the `hw-composite-control` type dispatcher, and `hw-fk-picker`. |
-| `@honuware/ui/photos` | `hw-photo-upload` — drag-drop, client-side resize/re-encode to JPEG, deferred-upload mode, `userMode` avatar path. |
+| `@honuware/ui/photos` | `hw-photo-upload` — drag-drop, client-side resize/re-encode to JPEG, deferred-upload mode, `userMode` avatar path; it says before sending when an image is still over the server's upload limit. `prepareImageForUpload()`, the same shrink step, for an app that sends a file itself. `hw-image-upload-settings`, a card for an admin settings page that sets the upload limit (1–50 MB, 10 MB by default). |
 | `@honuware/ui/auth` | `AuthService` + `AuthData`/permission helpers, the five route guards, `ErrorInterceptor`, the login/register/check-email/verify pages (`hw-login` / `-register` / `-check-email` / `-verify`), the forgot-password pair (`hw-forgot-password` / `-reset-password`), the `AUTH_ROUTES` config token, and the `tryTokenLoginInitializer` bootstrap factory. |
 | `@honuware/ui/crud` | The generic table editor: `DatabaseSchemaService`, table-binding utils, the `hw-table-view-control` / `hw-composite-row-control` containers, the TableView/Edit/New pages, and the `CRUD_EDITOR_ROUTES` token. |
 | `@honuware/ui/square` | `SquarePaymentService` (Web Payments SDK loader + card tokenizer) behind the `SQUARE_CONFIG` token. Depends on nothing internal. |
-| `@honuware/ui/testing` | In-memory mocks for tests — `MockCrudAccess` (schema-driven store), `MockAuthAccess` (session simulator), `MockPhotoAccess`, and `provideHonuwareAccessMock()`. |
+| `@honuware/ui/testing` | In-memory mocks for tests — `MockCrudAccess` (schema-driven store), `MockAuthAccess` (session simulator), `MockPhotoAccess`, `MockImageUploadSettingsAccess`, and `provideHonuwareAccessMock()`. |
 
 **Layering** (an entry may import only the entries below it): foundation → access → {controls, photos, auth} → crud; `square` is standalone; `testing` depends on access + auth.
 

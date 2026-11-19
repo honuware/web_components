@@ -2,6 +2,8 @@ import { InjectionToken, Provider, inject } from '@angular/core';
 import { CrudAccess } from './crud-access';
 import { AuthAccess } from './auth-access';
 import { PhotoAccess } from './photo-access';
+import { ImageUploadSettingsAccess } from './image-upload-settings-access';
+import { ImageUploadSettingsHttpAccess } from './image-upload-settings-http-access';
 import { HonuwareAccessProxy } from './honuware-access-proxy';
 
 // Narrow injection seams over the server-access layer. Framework-generic
@@ -30,6 +32,14 @@ export const HONUWARE_PHOTO_ACCESS = new InjectionToken<PhotoAccess>(
   { providedIn: 'root', factory: () => inject(HonuwareAccessProxy) }
 );
 
+// The image upload limit (see image-upload-settings-access.ts). Defaults to the
+// HTTP implementation directly: its three calls are independent reads and one
+// admin save, with nothing to serialize.
+export const HONUWARE_IMAGE_UPLOAD_SETTINGS_ACCESS = new InjectionToken<ImageUploadSettingsAccess>(
+  'HONUWARE_IMAGE_UPLOAD_SETTINGS_ACCESS',
+  { providedIn: 'root', factory: () => inject(ImageUploadSettingsHttpAccess) }
+);
+
 export interface HonuwareAccessConfig {
   /**
    * 'http' (default): wire the three tokens to the serializing proxy over the
@@ -40,6 +50,8 @@ export interface HonuwareAccessConfig {
   crud?: CrudAccess;
   auth?: AuthAccess;
   photo?: PhotoAccess;
+  /** Mock mode only, and optional: the image upload limit's implementation. */
+  imageUploadSettings?: ImageUploadSettingsAccess;
 }
 
 // Convenience wiring for a consumer's app config. `mode: 'http'` (default) is
@@ -55,6 +67,9 @@ export function provideHonuwareAccess(config: HonuwareAccessConfig = {}): Provid
       { provide: HONUWARE_CRUD_ACCESS, useValue: config.crud },
       { provide: HONUWARE_AUTH_ACCESS, useValue: config.auth },
       { provide: HONUWARE_PHOTO_ACCESS, useValue: config.photo },
+      ...(config.imageUploadSettings
+        ? [{ provide: HONUWARE_IMAGE_UPLOAD_SETTINGS_ACCESS, useValue: config.imageUploadSettings }]
+        : []),
     ];
   }
   return [

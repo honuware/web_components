@@ -1,8 +1,10 @@
+import { Injector } from '@angular/core';
 import { fakeAsync, flushMicrotasks } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 
 import { PhotoUploadComponent } from './photo-upload.component';
-import { PhotoUrlBuilder } from '@honuware/ui/access';
+import { HONUWARE_IMAGE_UPLOAD_SETTINGS_ACCESS, PhotoUrlBuilder } from '@honuware/ui/access';
+import { ImageTooLargeError, PreparedImage } from '../prepare-image-for-upload';
 
 describe('PhotoUploadComponent', () => {
   function makePhotoAccess() {
@@ -176,27 +178,165 @@ describe('PhotoUploadComponent', () => {
     expect(photoAccess.uploadPhoto.calls.mostRecent().args[3]).toBe('svg');
   });
 
-  it('still re-encodes a raster through the canvas path', fakeAsync(() => {
+  // The shrink step itself (vector detection, the canvas, the resize) is
+  // prepare-image-for-upload.spec.ts's; this is the control's use of it.
+  it('still re-encodes a raster through the canvas path', async () => {
     const { c, photoAccess } = make();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const prepare = spyOn<any>(c, 'prepareImageForUpload').and.callThrough();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const isVector = spyOn<any>(c, 'isVector').and.callThrough();
 
     c.onDrop({
       preventDefault: () => {}, stopPropagation: () => {},
       dataTransfer: { files: [jpegFile()] },
     } as unknown as DragEvent);
+    await waitUntil(() => !c.uploading);
+
+    expect(prepare).toHaveBeenCalled();
+    // The 3-byte fake JPEG cannot decode, so this ends in the error branch
+    // rather than an upload — which is itself the proof it went to the canvas
+    // and not the byte-for-byte vector path.
+    expect(c.error).toContain('JPEG');
+    expect(photoAccess.uploadPhoto).not.toHaveBeenCalled();
+  });
+
+  // ---- The upload limit (CommunityFinder CM3 Phase 2 §13.2) ----
+
+  // An injector that holds only the upload limit's access.
+  function withLimit(limit$: Observable<{ max_upload_bytes: number }>) {
+    const settings = {
+      getUploadLimit: jasmine.createSpy('getUploadLimit').and.returnValue(limit$),
+      getSettings: jasmine.createSpy('getSettings'),
+      saveSettings: jasmine.createSpy('saveSettings'),
+    };
+    const photoAccess = makePhotoAccess();
+    const injector = Injector.create({
+      providers: [{ provide: HONUWARE_IMAGE_UPLOAD_SETTINGS_ACCESS, useValue: settings }],
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const c = new PhotoUploadComponent(photoAccess as any, new PhotoUrlBuilder('/api'), injector);
+    c.tableName = 'classes';
+    c.tableItemId = 3;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    spyOn<any>(c, 'prepareImageForUpload').and.returnValue(
+      Promise.resolve({ buffer: new ArrayBuffer(3 * 1024 * 1024), imageType: 'jpeg' }));
+    return { c, photoAccess, settings };
+  }
+
+  it('says an image is still too big after shrinking, and sends nothing', fakeAsync(() => {
+    const { c, photoAccess } = withLimit(of({ max_upload_bytes: 2 * 1024 * 1024 }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (c as any).uploadFile(jpegFile());
     flushMicrotasks();
 
-    // The vector branch was CONSIDERED and declined — a raster must not take
-    // the byte-for-byte path, or the client-side resize stops happening.
-    expect(prepare).toHaveBeenCalled();
-    expect(isVector).toHaveBeenCalled();
-    expect(isVector.calls.mostRecent().returnValue).toBeFalse();
-    // The 3-byte fake JPEG cannot decode, so this ends in the error branch
-    // rather than an upload — which is itself the proof it went to the canvas.
     expect(photoAccess.uploadPhoto).not.toHaveBeenCalled();
+    expect(c.uploading).toBeFalse();
+    expect(c.error).toBe(
+      'This image is 3 MB even after shrinking, and the limit is 2 MB. Try a smaller image.');
+  }));
+
+  it('sends an image within the limit, reading the limit only once', fakeAsync(() => {
+    const { c, photoAccess, settings } = withLimit(of({ max_upload_bytes: 10 * 1024 * 1024 }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (c as any).uploadFile(jpegFile());
+    flushMicrotasks();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (c as any).uploadFile(jpegFile());
+    flushMicrotasks();
+
+    expect(photoAccess.uploadPhoto).toHaveBeenCalledTimes(2);
+    expect(settings.getUploadLimit).toHaveBeenCalledTimes(1);
+  }));
+
+  it('still sends when the limit cannot be read: the server checks it anyway', fakeAsync(() => {
+    const { c, photoAccess } = withLimit(throwError(() => new Error('401')));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (c as any).uploadFile(jpegFile());
+    flushMicrotasks();
+
+    expect(photoAccess.uploadPhoto).toHaveBeenCalled();
+  }));
+
+  it('never needs the limit just to show the control', () => {
+    const photoAccess = makePhotoAccess();
+    const injector = { get: jasmine.createSpy('get') } as unknown as Injector;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const c = new PhotoUploadComponent(photoAccess as any, new PhotoUrlBuilder('/api'), injector);
+    c.tableName = 'classes';
+    c.tableItemId = 3;
+    c.ngOnInit();
+    expect(injector.get).not.toHaveBeenCalled();
+  });
+
+  it('sends anyway when the access cannot be built', fakeAsync(() => {
+    const photoAccess = makePhotoAccess();
+    const injector = {
+      get: () => { throw new Error('NullInjectorError: No provider for HttpClient'); },
+    } as unknown as Injector;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const c = new PhotoUploadComponent(photoAccess as any, new PhotoUrlBuilder('/api'), injector);
+    c.tableName = 'classes';
+    c.tableItemId = 3;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    spyOn<any>(c, 'prepareImageForUpload').and.returnValue(
+      Promise.resolve({ buffer: new ArrayBuffer(3), imageType: 'jpeg' }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (c as any).uploadFile(jpegFile());
+    flushMicrotasks();
+
+    expect(photoAccess.uploadPhoto).toHaveBeenCalled();
+  }));
+
+  it('refuses a pending photo that is too big, saying so in the control', fakeAsync(() => {
+    const { c, photoAccess } = withLimit(of({ max_upload_bytes: 2 * 1024 * 1024 }));
+    c.deferUpload = true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (c as any).uploadFile(jpegFile());
+
+    let failure: unknown;
+    c.uploadPendingPhoto('classes', 9).subscribe({ error: (e) => (failure = e) });
+    flushMicrotasks();
+
+    expect(failure).toBeInstanceOf(ImageTooLargeError);
+    expect(c.error).toContain('even after shrinking');
+    expect(c.hasPendingFile).toBeTrue();
+    expect(photoAccess.uploadPhoto).not.toHaveBeenCalled();
+  }));
+
+  it('prepares a pending photo for an app that sends it itself', fakeAsync(() => {
+    const { c, photoAccess } = withLimit(of({ max_upload_bytes: 10 * 1024 * 1024 }));
+    c.deferUpload = true;
+
+    let nothing: unknown = 'unset';
+    c.preparePendingPhoto().subscribe((p) => (nothing = p));
+    expect(nothing).toBeNull();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (c as any).uploadFile(jpegFile());
+    // (Typed through `as`, so TypeScript doesn't narrow it to null for good:
+    // it's assigned in the callback.)
+    let prepared = null as PreparedImage | null;
+    c.preparePendingPhoto().subscribe((p) => (prepared = p));
+    flushMicrotasks();
+
+    expect(prepared!.imageType).toBe('jpeg');
+    expect(prepared!.buffer.byteLength).toBe(3 * 1024 * 1024);
+    // Sending it is the app's business.
+    expect(photoAccess.uploadPhoto).not.toHaveBeenCalled();
+    expect(c.hasPendingFile).toBeTrue();
+  }));
+
+  it('refuses to prepare a pending photo over the limit, and leaves the message to the app', fakeAsync(() => {
+    const { c } = withLimit(of({ max_upload_bytes: 2 * 1024 * 1024 }));
+    c.deferUpload = true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (c as any).uploadFile(jpegFile());
+
+    let failure: unknown;
+    c.preparePendingPhoto().subscribe({ error: (e) => (failure = e) });
+    flushMicrotasks();
+
+    expect(failure).toBeInstanceOf(ImageTooLargeError);
+    expect(c.error).toBeUndefined();
   }));
 
   it('onDeletePhoto removes the photo', () => {

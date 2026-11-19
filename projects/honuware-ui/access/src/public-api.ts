@@ -13,6 +13,7 @@
 export * from './crud-access';
 export * from './auth-access';
 export * from './photo-access';
+export * from './image-upload-settings-access';
 
 // Tokens + provider helper
 export * from './access-tokens';
@@ -23,6 +24,7 @@ export * from './honuware-access-proxy';
 export * from './crud-http-access';
 export * from './auth-http-access';
 export * from './photo-http-access';
+export * from './image-upload-settings-http-access';
 export * from './photo-url-builder';
 export * from './error.service';
 export * from './csrf.interceptor';

@@ -39,13 +39,13 @@ what you need (each is independently tree-shakeable, `sideEffects: false`):
 | Entry | Summary |
 |---|---|
 | `@honuware/ui/foundation` | Toast, confirm-dialog, animations, date utils, `sanitizeReturnUrl` |
-| `@honuware/ui/access` | `CrudAccess`/`AuthAccess`/`PhotoAccess` seams + tokens, DTOs, error stack, `CsrfInterceptor`, `PhotoUrlBuilder`, HTTP impls, `provideHonuwareAccess()` |
+| `@honuware/ui/access` | `CrudAccess`/`AuthAccess`/`PhotoAccess`/`ImageUploadSettingsAccess` seams + tokens, DTOs, error stack, `CsrfInterceptor`, `PhotoUrlBuilder`, HTTP impls, `provideHonuwareAccess()` |
 | `@honuware/ui/controls` | Schema-driven field controls, `hw-composite-control`, `hw-fk-picker` |
-| `@honuware/ui/photos` | `hw-photo-upload` (drag-drop, client resize, deferred/avatar modes) |
+| `@honuware/ui/photos` | `hw-photo-upload` (drag-drop, client resize, deferred/avatar modes, upload-limit check), `prepareImageForUpload()`, `hw-image-upload-settings` |
 | `@honuware/ui/auth` | `AuthService`, route guards, `ErrorInterceptor`, login/register/verify pages, `AUTH_ROUTES` |
 | `@honuware/ui/crud` | The generic table editor: `DatabaseSchemaService`, containers, pages, `CRUD_EDITOR_ROUTES` |
 | `@honuware/ui/square` | `SquarePaymentService` + `SQUARE_CONFIG` (no internal deps) |
-| `@honuware/ui/testing` | In-memory `MockCrudAccess`/`MockAuthAccess`/`MockPhotoAccess` + `provideHonuwareAccessMock()` |
+| `@honuware/ui/testing` | In-memory `MockCrudAccess`/`MockAuthAccess`/`MockPhotoAccess`/`MockImageUploadSettingsAccess` + `provideHonuwareAccessMock()` |
 
 ## Layering
 
